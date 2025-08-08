@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>MARIAN API IA</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    label, input, textarea { display: block; margin: 1em 0; }
+    #respuesta { white-space: pre-wrap; background: #f0f0f0; padding: 1em; }
+  </style>
+</head>
+<body>
+  <h1>MARIAN API IA</h1>
+  <h3>Utilizando modelo:<strong>Gemini 1.5</strong> </h3>
+  <form id="geminiForm">
+    <label for="promptBase">Prompt Base:</label>
+    <textarea id="promptBase" rows="2" cols="60">Prompt base</textarea>
+    
+    <label for="consulta">Consulta del usuario:</label>
+    <input type="text" id="consulta" size="60" required>
+    
+    <button type="submit">Enviar consulta</button>
+  </form>
+  
+  <h2>Respuesta:</h2>
+  <div id="respuesta"></div>
+  
+  <script>
+    document.getElementById('geminiForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=AIzaSyDA-Oa3GFjeaDtf0UHoouPE7Py66g7SILM';
+      var promptBase = document.getElementById('promptBase').value;
+      var searchQuery = document.getElementById('consulta').value;
+      
+      var data = {
+        contents: [
+          {
+            parts: [
+              {
+                text: promptBase + '\n\nConsulta del usuario: ' + searchQuery
+              }
+            ]
+          }
+        ]
+      };
+      
+      var respuestaDiv = document.getElementById('respuesta');
+      respuestaDiv.textContent = "Consultando...";
+      
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', url, true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            try {
+              var res = JSON.parse(xhr.responseText);
+              respuestaDiv.textContent = JSON.stringify(res, null, 2);
+            } catch (err) {
+              respuestaDiv.textContent = "Error al parsear respuesta: " + err;
+            }
+          } else {
+            respuestaDiv.textContent = "Error: " + xhr.status + "\n" + xhr.responseText;
+          }
+        }
+      };
+      
+      xhr.send(JSON.stringify(data));
+    });
+  </script>
+</body>
+</html>
